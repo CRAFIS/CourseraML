@@ -67,16 +67,19 @@ X = [ones(m,1) X];
 unit = eye(num_labels);
 y = unit(y, :);
 
-a1 = X;
-z2 = a1 * Theta1';
-a2 = sigmoid(z2);
-a2 = [ones(m,1) a2];
-z3 = a2 * Theta2';
-a3 = sigmoid(z3);
-delta3 = a3 - y;
-delta2 = delta3 * Theta2(:,2:end) .* sigmoidGradient(z2);
-Theta1_grad = delta2' * a1;
-Theta2_grad = delta3' * a2;
+% Theta1 = (hidden, input + 1)
+% Theta2 = (output, hidden + 1)
+
+a1 = X; % (m, input + 1)
+z2 = a1 * Theta1'; % (m, input + 1) * (input + 1, hidden) = (m, hidden)
+a2 = sigmoid(z2); % (m, hidden)
+a2 = [ones(m,1) a2]; % (m, hidden + 1)
+z3 = a2 * Theta2'; % (m, hidden + 1) * (hidden + 1, output) = (m, output)
+a3 = sigmoid(z3); % (m, output)
+delta3 = a3 - y; % (m, output)
+delta2 = delta3 * Theta2(:,2:end) .* sigmoidGradient(z2); % (m, output) * (output, hidden) = (m, hidden)
+Theta1_grad = delta2' * a1; % (hidden, m) * (m, input + 1) = (hidden, input + 1)
+Theta2_grad = delta3' * a2; % (output, m) * (m, hidden + 1) = (output, hidden + 1)
 J = sum(sum( -y .* log(a3) -(1-y) .* log(1-a3) ));
 
 %{
@@ -101,9 +104,9 @@ Theta1_sum = sum(sum(Theta1(:,2:end).^2));
 Theta2_sum = sum(sum(Theta2(:,2:end).^2));
 J = J/m + (lambda/(2*m)) * ( Theta1_sum + Theta2_sum );
 
-Regular = (lambda/m) * [zeros(hidden_layer_size,1) Theta1(:,2:end)];
+Regular = (lambda/m) * [zeros(hidden_layer_size,1) Theta1(:,2:end)]; % (hidden, input + 1)
 Theta1_grad = Theta1_grad/m + Regular;
-Regular = (lambda/m) * [zeros(num_labels,1) Theta2(:,2:end)];
+Regular = (lambda/m) * [zeros(num_labels,1) Theta2(:,2:end)]; % (output, hidden + 1)
 Theta2_grad = Theta2_grad/m + Regular;
 
 
